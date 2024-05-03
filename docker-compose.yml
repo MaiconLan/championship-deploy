@@ -1,0 +1,78 @@
+version: '3'
+
+services:
+  postgres:
+    image: postgres
+    container_name: postgres
+    environment:
+      POSTGRES_PASSWORD: $JDBC_DATABASE_PASSWORD
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - backend
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: $EMAIL
+      PGADMIN_DEFAULT_PASSWORD: $JDBC_DATABASE_PASSWORD
+    ports:
+      - "16543:80"
+    depends_on:
+      - postgres
+    networks:
+      - backend
+
+  backend:
+    image: backend
+    container_name: backend
+    build:
+      context: championship-api
+      dockerfile: docker/Dockerfile
+    environment:
+      JDBC_DATABASE_PASSWORD: $JDBC_DATABASE_PASSWORD
+      JDBC_DATABASE_USERNAME: $JDBC_DATABASE_USERNAME
+      JDBC_DATABASE_URL: $JDBC_DATABASE_URL
+      FRONTEND_URL: $FRONTEND_URL
+    ports:
+      - "8080:8080"
+    networks:
+      - backend
+    depends_on:
+      - postgres
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 2
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+
+  frontend:
+    image: frontend
+    container_name: frontend
+    build:
+      context: championship-frontend
+      dockerfile: docker/Dockerfile
+    command: sh -c "npm start"
+    volumes:
+      - ./:/angular-app
+      - node_modules:/home/node/app/node_modules
+    environment:
+      STYLE: scss
+    ports:
+      - "4200:4200"
+    depends_on:
+      - backend
+    networks:
+      - frontend
+
+networks:
+  frontend:
+  backend:
+volumes:
+  db-data:
+  node_modules:
