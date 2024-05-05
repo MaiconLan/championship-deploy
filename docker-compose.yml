@@ -62,7 +62,8 @@ services:
       STYLE: scss
     ports:
       - "4200:4200"
-
+    depends_on:
+      - backend
     networks:
       - frontend
 
