@@ -28,7 +28,7 @@ services:
       - backend
 
   backend:
-    image: backend
+    image: maiconlanzendorf/championship-api:1.0.0
     container_name: backend
     build:
       context: championship-api
@@ -54,7 +54,7 @@ services:
         condition: on-failure
 
   frontend:
-    image: frontend
+    image: maiconlanzendorf/championship-ui:1.5.8
     container_name: frontend
     build:
       context: championship-frontend

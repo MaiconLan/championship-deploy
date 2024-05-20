@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: C:\dev\kompose\kompose.exe convert
+    kompose.version: 1.33.0 (3ce457399)
+  labels:
+    io.kompose.service: backend
+  name: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: backend
+  strategy:
+    type: Recreate
+  template:
+  # => from here down its the same as the pods metadata: and spec: 
+    metadata:
+      annotations:
+        kompose.cmd: C:\dev\kompose\kompose.exe convert
+        kompose.version: 1.33.0 (3ce457399)
+      labels:
+        io.kompose.network/championship-deploy-backend: "true"
+        io.kompose.service: backend
+      name: backend
+    spec:
+      containers:
+        - env:
+            - name: APP_NAME
+              value: "Championship Management"
+            - name: FRONTEND_URL
+              value: "http://localhost:4200"
+            - name: JDBC_DATABASE_PASSWORD
+              value: "postgres"
+            - name: JDBC_DATABASE_URL
+              value: "jdbc:postgresql://10.108.233.251:5432/championship-dev"
+            - name: JDBC_DATABASE_USERNAME
+              value: "postgres"
+          image: maiconlanzendorf/championship-api:1.0.0
+          name: backend
+          ports:
+            - containerPort: 8080
+              hostPort: 8080
+              protocol: TCP
+      restartPolicy: Always
